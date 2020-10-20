@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".InputCategory"
+    tools:showIn="@layout/activity_input_category">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/guide_text"
+        android:text="カテゴリーを入力したら登録ボタンを押してください。"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/category_editText"
+        android:layout_below="@+id/guide_text"
+        android:layout_marginTop="16dp"
+        android:hint="カテゴリーを入力してください"/>
+
+    <Button
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/category_editText"
+        android:layout_alignParentRight="true"
+        android:id="@+id/add_button"
+        android:text="登録"/>
+
+    <ListView
+        android:id="@+id/cat_listView"
+        android:layout_below="@+id/add_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+</RelativeLayout>

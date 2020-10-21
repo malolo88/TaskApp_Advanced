@@ -10,6 +10,7 @@ import android.content.Intent
 import android.support.v7.app.AlertDialog
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.widget.Spinner
 
 
 const val EXTRA_TASK = "jp.techacademy.taro.kirameki.taskapp.TASK"
@@ -19,14 +20,17 @@ class MainActivity : AppCompatActivity() {
     private val mRealmListener = object : RealmChangeListener<Realm> {
         override fun onChange(element: Realm) {
             reloadListView()
+            reloadSpinnerView()
         }
     }
 
     private lateinit var mTaskAdapter: TaskAdapter
+    private lateinit var mCatAdapter: CatAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
         fab.setOnClickListener { view ->
             val intent = Intent(this@MainActivity, InputActivity::class.java)
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         // ListViewの設定
         mTaskAdapter = TaskAdapter(this@MainActivity)
+        mCatAdapter = CatAdapter(this@MainActivity)
 
         // ListViewをタップしたときの処理
         listView1.setOnItemClickListener { parent, _, position, _ ->
@@ -90,6 +95,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         reloadListView()
+        reloadSpinnerView()
+
     }
 
     private fun reloadListView() {
@@ -111,5 +118,25 @@ class MainActivity : AppCompatActivity() {
 
         mRealm.close()
     }
+
+    private fun reloadSpinnerView() {
+        val spinner: Spinner = findViewById(R.id.spinner_search)
+
+        //Realmインスタンスを取得
+        mRealm = Realm.getDefaultInstance()
+
+        //カテゴリーの情報をIDの降順で取得する
+        val catRealmResults = mRealm.where(Category::class.java).findAll().sort("categoryId", Sort.DESCENDING)
+
+        // 上記の結果を、CatList としてセットする
+        mCatAdapter.catList = mRealm.copyFromRealm(catRealmResults)
+
+        //spinner用のアダプタに渡す
+        spinner.adapter = mCatAdapter
+
+        // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+        mCatAdapter.notifyDataSetChanged()
+    }
+
 
 }

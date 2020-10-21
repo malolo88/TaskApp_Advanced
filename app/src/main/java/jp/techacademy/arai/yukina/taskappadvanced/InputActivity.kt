@@ -12,14 +12,20 @@ import java.util.*
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
 import android.widget.Spinner
+import io.realm.RealmChangeListener
 import io.realm.Sort
 import kotlinx.android.synthetic.main.activity_main.*
 
-class InputActivity : AppCompatActivity() {
+class InputActivity : AppCompatActivity(){
+
+    private lateinit var mCatAdapter: CatAdapter
+    private lateinit var mRealm: Realm
+    private val mRealmListener = object : RealmChangeListener<Realm> {
+        override fun onChange(element: Realm) {
+            reloadSpinnerView()
+        }
+    }
 
     private var mYear = 0
     private var mMonth = 0
@@ -27,7 +33,6 @@ class InputActivity : AppCompatActivity() {
     private var mHour = 0
     private var mMinute = 0
     private var mTask: Task? = null
-
 
     private val mOnDateClickListener = View.OnClickListener {
         val datePickerDialog = DatePickerDialog(this,
@@ -122,8 +127,15 @@ class InputActivity : AppCompatActivity() {
             times_button.text = timeString
         }
 
-        //Spinnerの設定
-        setSpinner()
+        //Realmの設定
+        mRealm = Realm.getDefaultInstance()
+        mRealm.addChangeListener(mRealmListener)
+
+        // ListViewの設定
+        mCatAdapter = CatAdapter(this@InputActivity)
+
+        //Spinnerの表示
+        reloadSpinnerView()
 
     }
 
@@ -175,26 +187,26 @@ class InputActivity : AppCompatActivity() {
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, resultPendingIntent)
     }
 
-    private lateinit var mRealm: Realm
 
-    //Spinnerの設定
-    private fun setSpinner(){
+
+    private fun reloadSpinnerView() {
         val spinner: Spinner = findViewById(R.id.entry_spinner)
 
-        //カテゴリーの情報を全部取得する
+        //Realmインスタンスを取得
         mRealm = Realm.getDefaultInstance()
+
+        //カテゴリーの情報をIDの降順で取得する
         val catRealmResults = mRealm.where(Category::class.java).findAll().sort("categoryId", Sort.DESCENDING)
 
         // 上記の結果を、CatList としてセットする
-        val catList = mRealm.copyFromRealm(catRealmResults)
-        val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, catList)
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = arrayAdapter
+        mCatAdapter.catList = mRealm.copyFromRealm(catRealmResults)
 
+        //spinner用のアダプタに渡す
+        spinner.adapter = mCatAdapter
 
-
+        // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+        mCatAdapter.notifyDataSetChanged()
     }
-
 
 }
 

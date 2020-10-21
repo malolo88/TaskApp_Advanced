@@ -3,11 +3,9 @@ package jp.techacademy.arai.yukina.taskappadvanced
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import kotlinx.android.synthetic.main.activity_input_category.*
+import android.support.v7.widget.Toolbar
+import android.view.View
 import io.realm.Realm
-import android.widget.Toast
-import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.category_input.*
 
 
@@ -20,16 +18,20 @@ class InputCategory : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_input_category)
 
-        add_button.setOnClickListener(){
-            addCategory()
-            Toast.makeText(applicationContext, "登録しました", Toast.LENGTH_LONG).show()
-
-            finish()
+        // ActionBarを設定する
+        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        setSupportActionBar(toolbar)
+        if (supportActionBar != null) {
+            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
 
-    }
+        add_button.setOnClickListener(){
+            addCategory()
+            finish()
+        }
 
+    }
 
     private fun addCategory(){
         val realm = Realm.getDefaultInstance()

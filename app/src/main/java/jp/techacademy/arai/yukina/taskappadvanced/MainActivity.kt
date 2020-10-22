@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             val intent = Intent(this@MainActivity, InputActivity::class.java)
             startActivity(intent)
+            reloadSpinnerView()
         }
 
         // Realmの設定
@@ -96,7 +97,6 @@ class MainActivity : AppCompatActivity() {
 
         reloadListView()
         reloadSpinnerView()
-
     }
 
     private fun reloadListView() {

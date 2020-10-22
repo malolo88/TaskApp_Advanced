@@ -12,6 +12,8 @@ import java.util.*
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.util.Log
+import android.widget.AdapterView
 import android.widget.Spinner
 import io.realm.RealmChangeListener
 import io.realm.Sort
@@ -187,8 +189,6 @@ class InputActivity : AppCompatActivity(){
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, resultPendingIntent)
     }
 
-
-
     private fun reloadSpinnerView() {
         val spinner: Spinner = findViewById(R.id.entry_spinner)
 
@@ -206,7 +206,28 @@ class InputActivity : AppCompatActivity(){
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
         mCatAdapter.notifyDataSetChanged()
-    }
 
+        spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                var selectedCat = mCatAdapter.getItemId(position).toInt()
+                mTask!!.category = selectedCat
+
+                Log.d("テスト", "$selectedCat")
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //
+            }
+        }
+    }
 }
+
+
+
 

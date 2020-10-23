@@ -12,12 +12,10 @@ import java.util.*
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.util.Log
 import android.widget.AdapterView
 import android.widget.Spinner
 import io.realm.RealmChangeListener
 import io.realm.Sort
-import kotlinx.android.synthetic.main.activity_main.*
 
 class InputActivity : AppCompatActivity(){
 
@@ -35,6 +33,7 @@ class InputActivity : AppCompatActivity(){
     private var mHour = 0
     private var mMinute = 0
     private var mTask: Task? = null
+    private var mCategoryId = 0
 
     private val mOnDateClickListener = View.OnClickListener {
         val datePickerDialog = DatePickerDialog(this,
@@ -139,6 +138,23 @@ class InputActivity : AppCompatActivity(){
         //Spinnerの表示
         reloadSpinnerView()
 
+        //カテゴリーが選択されたとき
+        entry_spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                mCategoryId = mCatAdapter.getItemId(position).toInt()
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //
+            }
+        }
+
     }
 
     private fun addTask() {
@@ -196,35 +212,18 @@ class InputActivity : AppCompatActivity(){
         mRealm = Realm.getDefaultInstance()
 
         //カテゴリーの情報をIDの降順で取得する
-        val catRealmResults = mRealm.where(Category::class.java).findAll().sort("categoryId", Sort.DESCENDING)
+        val catRealmResults = mRealm.where(Category::class.java).notEqualTo("categoryId", 0.toInt()).findAll().sort("categoryId", Sort.DESCENDING)
 
         // 上記の結果を、CatList としてセットする
         mCatAdapter.catList = mRealm.copyFromRealm(catRealmResults)
 
         //spinner用のアダプタに渡す
         spinner.adapter = mCatAdapter
+        //entry_spinner.setSelection(mCategoryId)
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
         mCatAdapter.notifyDataSetChanged()
 
-        spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                var selectedCat = mCatAdapter.getItemId(position).toInt()
-                mTask!!.category = selectedCat
-
-                Log.d("テスト", "$selectedCat")
-
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                //
-            }
-        }
     }
 }
 

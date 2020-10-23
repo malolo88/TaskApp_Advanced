@@ -1,6 +1,5 @@
 package jp.techacademy.arai.yukina.taskappadvanced
 
-import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
@@ -11,8 +10,7 @@ import kotlinx.android.synthetic.main.category_input.*
 
 class InputCategory : AppCompatActivity() {
 
-    private var mCat: Category? = null
-
+    private var mCategory: Category? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +23,6 @@ class InputCategory : AppCompatActivity() {
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
-
         add_button.setOnClickListener(){
             addCategory()
             finish()
@@ -37,9 +34,9 @@ class InputCategory : AppCompatActivity() {
         val realm = Realm.getDefaultInstance()
         realm.beginTransaction()
 
-        if (mCat == null) {
+        if (mCategory == null) {
             //カテゴリーの新規作成
-            mCat = Category()
+            mCategory = Category()
 
             val categoryRealmResults = realm.where(Category::class.java).findAll()
 
@@ -47,16 +44,16 @@ class InputCategory : AppCompatActivity() {
                 if (categoryRealmResults.max("categoryId") != null) {
                     categoryRealmResults.max("categoryId")!!.toInt() + 1
                 } else {
-                    0
+                    1 //0は「すべて」を表示するために使用しているため
                 }
-            mCat!!.categoryId = identifier
+            mCategory!!.categoryId = identifier
         }
 
         val category = category_editText.text.toString()
 
-        mCat!!.categoryName = category
+        mCategory!!.categoryName = category
 
-        realm.copyToRealmOrUpdate(mCat!!)
+        realm.copyToRealmOrUpdate(mCategory!!)
         realm.commitTransaction()
 
         realm.close()

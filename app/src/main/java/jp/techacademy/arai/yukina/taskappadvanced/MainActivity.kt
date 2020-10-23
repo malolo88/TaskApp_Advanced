@@ -10,6 +10,8 @@ import android.content.Intent
 import android.support.v7.app.AlertDialog
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.view.View
+import android.widget.AdapterView
 import android.widget.Spinner
 
 
@@ -26,6 +28,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mTaskAdapter: TaskAdapter
     private lateinit var mCatAdapter: CatAdapter
+    private val mTask: Task? = null
+    private val mCategory: Category? = null
+    private  var mCategoryId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +101,54 @@ class MainActivity : AppCompatActivity() {
         }
 
         reloadListView()
+
+        if(mCategory?.categoryId == null){
+            val category = Category()
+            category.categoryName = "すべて"
+            category.categoryId = 0
+            mRealm.beginTransaction()
+            mRealm.copyToRealmOrUpdate(category)
+            mRealm.commitTransaction()
+        }
+
+        //カテゴリーの表示
         reloadSpinnerView()
+        //カテゴリーが選択されたとき
+        spinner_search.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                //選択されたカテゴリーの情報を取得する
+                mCategoryId = mCatAdapter.getItemId(position).toInt()
+
+                val category = mTask?.category
+
+                //Realmデータベースから、「カテゴリーの検索結果」を取得
+                var searchResults = mRealm.where(Task::class.java).equalTo("category", mCategoryId).findAll()
+
+
+                if(mCategoryId == 0){
+                    reloadListView()
+                } else {
+                    //カテゴリーの検索結果を、TaskList としてセットする
+                    mTaskAdapter.taskList = mRealm.copyFromRealm(searchResults)
+
+                    //TaskのListView用のアダプタに渡す
+                    listView1.adapter = mTaskAdapter
+
+                    //表示を更新するために、アダプターにデータが変更されたことを知らせる
+                    mTaskAdapter.notifyDataSetChanged()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //
+            }
+        }
+
     }
 
     private fun reloadListView() {
@@ -126,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         mRealm = Realm.getDefaultInstance()
 
         //カテゴリーの情報をIDの降順で取得する
-        val catRealmResults = mRealm.where(Category::class.java).findAll().sort("categoryId", Sort.DESCENDING)
+        val catRealmResults = mRealm.where(Category::class.java).findAll().sort("categoryId", Sort.ASCENDING)
 
         // 上記の結果を、CatList としてセットする
         mCatAdapter.catList = mRealm.copyFromRealm(catRealmResults)
@@ -136,7 +188,9 @@ class MainActivity : AppCompatActivity() {
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
         mCatAdapter.notifyDataSetChanged()
+
     }
 
 
 }
+

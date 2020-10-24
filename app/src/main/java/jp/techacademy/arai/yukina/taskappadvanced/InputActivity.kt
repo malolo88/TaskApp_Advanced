@@ -109,6 +109,7 @@ class InputActivity : AppCompatActivity(){
             // 更新の場合
             title_edit_text.setText(mTask!!.title)
             content_edit_text.setText(mTask!!.contents)
+            mCategoryId = mTask!!.category
 
             val calendar = Calendar.getInstance()
             calendar.time = mTask!!.date
@@ -182,6 +183,7 @@ class InputActivity : AppCompatActivity(){
 
         mTask!!.title = title
         mTask!!.contents = content
+        mTask!!.category = mCategoryId
 
         val calendar = GregorianCalendar(mYear, mMonth, mDay, mHour, mMinute)
         val date = calendar.time
@@ -212,14 +214,17 @@ class InputActivity : AppCompatActivity(){
         mRealm = Realm.getDefaultInstance()
 
         //カテゴリーの情報をIDの降順で取得する
-        val catRealmResults = mRealm.where(Category::class.java).notEqualTo("categoryId", 0.toInt()).findAll().sort("categoryId", Sort.DESCENDING)
+        val catRealmResults = mRealm.where(Category::class.java).notEqualTo("categoryId", 0.toInt()).findAll().sort("categoryId", Sort.ASCENDING)
 
         // 上記の結果を、CatList としてセットする
         mCatAdapter.catList = mRealm.copyFromRealm(catRealmResults)
 
         //spinner用のアダプタに渡す
         spinner.adapter = mCatAdapter
-        //entry_spinner.setSelection(mCategoryId)
+
+        if (mCategoryId > 0){
+            entry_spinner.setSelection(mCategoryId -1, false)
+        }
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
         mCatAdapter.notifyDataSetChanged()
